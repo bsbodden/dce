@@ -1,5 +1,7 @@
 # Baseball Player Stats
 
+[![Code Climate](https://codeclimate.com/github/bsbodden/dce/badges/gpa.svg)](https://codeclimate.com/github/bsbodden/dce)
+
 ## Purpose
 
 It provides:
