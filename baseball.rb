@@ -90,8 +90,8 @@ module Baseball
       results = {}
       stats = stats_filtered_by({team: team, year: year})
       stats.each do |s|
-        percentage = ((s.H - s.SECONDB - s.THIRDB - s.HR) + (2 * s.SECONDB) + (3 * s.THIRDB) + (4 * s.HR)) / s.AB
-        results[s.id] = percentage unless percentage.nan?
+        percentage = slugging_percentage(s)
+        results[s.id] = percentage if percentage
       end
       results
     end
@@ -135,6 +135,11 @@ module Baseball
 
         keep
       end
+    end
+
+    def self.slugging_percentage(s)
+      percentage = ((s.H - s.SECONDB - s.THIRDB - s.HR) + (2 * s.SECONDB) + (3 * s.THIRDB) + (4 * s.HR)) / s.AB
+      percentage.nan? ? nil : percentage
     end
 
   end
