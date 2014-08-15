@@ -97,7 +97,7 @@ module Baseball
     # extract to a Team class (collection of players if more functionality required around teams)
     def self.slugging_performance(team, year)
       results = {}
-      stats = all.map(&:stats).flatten.keep_if { |s| s.team == team && s.year == year }
+      stats = stats_filtered_by({team: team, year: year})
       stats.each do |s|
         percentage = ((s.H - s.SECONDB - s.THIRDB - s.HR) + (2 * s.SECONDB) + (3 * s.THIRDB) + (4 * s.HR)) / s.AB
         results[s.id] = percentage unless percentage.nan?
@@ -107,12 +107,28 @@ module Baseball
 
     # The player that had the highest batting average AND the most home runs AND the most RBI in their league.
     def self.triple_crown_winner(league, year, at_bats_min = 400.0)
-      stats = all.map(&:stats).flatten.keep_if { |s| s.league == league && s.year == year }
+      stats = stats_filtered_by({league: league, year: year})
       max_by_ba = stats.max_by { |s| ba = s.H / s.AB; ba.nan? || s.AB < at_bats_min ? 0 : ba }.id
       max_by_hr = stats.max_by { |s| s.HR }.id
       max_by_rbi = stats.max_by { |s| s.RBI }.id
 
       [max_by_ba, max_by_hr, max_by_rbi].uniq.size == 1 ? max_by_ba : nil
     end
+
+    private
+
+    # pass a hash of filters like { :league => 'AL', :year => 2011 }
+    # filters are ANDed together
+    def self.stats_filtered_by(filters)
+      all.map(&:stats).flatten.keep_if do |s|
+        keep = true
+        filters.each do |key, value|
+          keep = keep && s.send(key) == value
+        end
+
+        keep
+      end
+    end
+
   end
 end
