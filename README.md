@@ -5,6 +5,7 @@
 ## Purpose
 
 It provides:
+
 1. Most improved batting average( hits / at-bats) from 2009 to 2010.
    Only include players with at least 200 at-bats.
 2. Slugging percentage for all players on the Oakland A's (teamID = OAK) in 2007.
