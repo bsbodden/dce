@@ -55,7 +55,7 @@ module Baseball
     end
 
     def batting_average(year, at_bats_min = 0, league = nil)
-      stat = stats.select { |stat| (stat.year == year) && (stat.AB > at_bats_min) && (league.nil? ? true : stat.league == league)}.first
+      stat = stat_by(year, at_bats_min, league)
       stat.nil? ? nil : stat.H / stat.AB
     end
 
@@ -105,7 +105,18 @@ module Baseball
 
     private
 
+    def stat_by(year, at_bats_min, league)
+      stats.select do |stat|
+        (stat.year == year) &&
+        (stat.AB > at_bats_min) &&
+        (league.nil? ? true : stat.league == league)
+      end.first
+    end
+
     #
+    # class methods
+    #
+
     def self.fetch_rows(file, fields, to_f_fields = nil)
       rows = CSV.read(file)
       rows.shift
