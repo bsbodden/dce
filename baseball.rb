@@ -154,7 +154,9 @@ module Baseball
     end
 
     def self.slugging_percentage(s)
-      percentage = ((s.H - s.SECONDB - s.THIRDB - s.HR) + (2 * s.SECONDB) + (3 * s.THIRDB) + (4 * s.HR)) / s.AB
+      percentage = s.H - s.SECONDB - s.THIRDB - s.HR
+      percentage = percentage + (2 * s.SECONDB) + (3 * s.THIRDB) + (4 * s.HR)
+      percentage = percentage / s.AB
       percentage.nan? ? nil : percentage
     end
 
