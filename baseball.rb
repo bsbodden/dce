@@ -55,12 +55,8 @@ module Baseball
     end
 
     def batting_average(year, at_bats_min = 0, league = nil)
-      if stats
-        stat = stats.select { |stat| (stat.year == year) && (stat.AB > at_bats_min) && (league.nil? ? true : stat.league == league)}.first
-        stat.nil? ? nil : stat.H / stat.AB
-      else
-        nil
-      end
+      stat = stats.select { |stat| (stat.year == year) && (stat.AB > at_bats_min) && (league.nil? ? true : stat.league == league)}.first
+      stat.nil? ? nil : stat.H / stat.AB
     end
 
     def batting_average_improvement(from, to, at_bats_min = 0)
