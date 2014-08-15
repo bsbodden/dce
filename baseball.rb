@@ -20,8 +20,8 @@ require 'csv'
 
 module Baseball
   class Player < Hashie::Mash
-    MASTER = './data/Master-small.csv'
-    BATTING = './data/Batting-07-12.csv'
+    MASTER_FILE = './data/Master-small.csv'
+    BATTING_FILE = './data/Batting-07-12.csv'
 
     MASTER_FIELDS = { id: 0, birth_year: 1, first_name: 2, last_name: 3 }
     BATTING_FIELDS = { id: 0, year: 1, league: 2, team: 3, G: 4, AB: 5, R: 6,
@@ -33,22 +33,13 @@ module Baseball
     def self.fetch!
       @@data = {}
 
-      player_rows = CSV.read(Player::MASTER)
-      player_rows.shift
-
-      player_rows.each do |row|
-        values_keyed = Hash[MASTER_FIELDS.keys.map { |sym| [sym, row[MASTER_FIELDS[sym]]] }]
+      fetch_rows(MASTER_FILE, MASTER_FIELDS) do |values_keyed|
         player = self.new(values_keyed)
         player.stats = []
         @@data[player.id] = player
       end
 
-      batting_rows = CSV.read(Player::BATTING)
-      batting_rows.shift
-
-      batting_rows.each do |row|
-        values_keyed = Hash[BATTING_FIELDS.keys.map { |sym| [sym, row[BATTING_FIELDS[sym]]] }]
-        values_keyed = values_keyed.inject({}) { |h, (k, v)| h[k] = BATTING_FIELDS_TO_F.include?(k) ? v.to_f : v ; h }
+      fetch_rows(BATTING_FILE, BATTING_FIELDS, BATTING_FIELDS_TO_F) do |values_keyed|
         @@data[values_keyed[:id]].stats << Hashie::Mash.new(values_keyed)
       end
 
@@ -116,6 +107,22 @@ module Baseball
     end
 
     private
+
+    #
+    def self.fetch_rows(file, fields, to_f_fields = nil)
+      rows = CSV.read(file)
+      rows.shift
+
+      rows.each do |row|
+        values_keyed = Hash[fields.keys.map { |sym| [sym, row[fields[sym]]] }]
+        if to_f_fields
+          values_keyed = values_keyed.inject({}) do |h, (k, v)|
+            h[k] = to_f_fields.include?(k) ? v.to_f : v ; h
+          end
+        end
+        yield(values_keyed)
+      end
+    end
 
     # pass a hash of filters like { :league => 'AL', :year => 2011 }
     # filters are ANDed together
