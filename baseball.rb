@@ -99,11 +99,12 @@ module Baseball
     # The player that had the highest batting average AND the most home runs AND the most RBI in their league.
     def self.triple_crown_winner(league, year, at_bats_min = 400.0)
       stats = stats_filtered_by({league: league, year: year})
-      max_by_ba = stats.max_by { |s| ba = s.H / s.AB; ba.nan? || s.AB < at_bats_min ? 0 : ba }.id
-      max_by_hr = stats.max_by { |s| s.HR }.id
-      max_by_rbi = stats.max_by { |s| s.RBI }.id
 
-      [max_by_ba, max_by_hr, max_by_rbi].uniq.size == 1 ? max_by_ba : nil
+      max_by_ba = stats_max_by_ba(stats, at_bats_min)
+      max_by_hr = stats_max_by(stats, :HR)
+      max_by_rbi = stats_max_by(stats, :RBI)
+
+      all_the_same(max_by_ba, max_by_hr, max_by_rbi) ? max_by_ba : nil
     end
 
     private
@@ -137,9 +138,21 @@ module Baseball
       end
     end
 
+    def self.stats_max_by(stats, field)
+      stats.max_by { |s| s.send(field) }.id
+    end
+
+    def self.stats_max_by_ba(stats, at_bats_min)
+      stats.max_by { |s| ba = s.H / s.AB; ba.nan? || s.AB < at_bats_min ? 0 : ba }.id
+    end
+
     def self.slugging_percentage(s)
       percentage = ((s.H - s.SECONDB - s.THIRDB - s.HR) + (2 * s.SECONDB) + (3 * s.THIRDB) + (4 * s.HR)) / s.AB
       percentage.nan? ? nil : percentage
+    end
+
+    def self.all_the_same(*things)
+      things.uniq.size == 1
     end
 
   end
